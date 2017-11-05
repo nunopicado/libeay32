@@ -27,6 +27,11 @@ added by me to the unit for convenience. I do not know, unfortunately,
 to whom this code's credit is due. If you think it might be you, please
 feel free to let me know so I can act accordingly.
 
+EDIT: Turns out I had saved the source from which I took the 
+libeay.ext.pas code, having it written in this unit.
+Its from the project Delphi On Rails, to which credit for the remaining 
+code is due.
+
 
 License (from original libeay32.pas)
 =======
