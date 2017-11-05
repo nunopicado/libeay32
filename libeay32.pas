@@ -1338,6 +1338,19 @@ function SMIME_write_PKCS7(bp: pBIO; p7: pPKCS7; data: pBIO;
     flags: integer): integer; cdecl;
 function SMIME_read_PKCS7(bp: pBIO; var bcont: pBIO): pPKCS7; cdecl;
 
+// libeay.ext.pas functions
+function EVP_CipherInit_ex(ctx: PEVP_CIPHER_CTX; const cipher: PEVP_CIPHER;
+  impl: PNotImplemented; const key, iv: PByte; enc: Integer): Integer; cdecl;
+procedure EVP_CIPHER_CTX_free(a: PEVP_CIPHER_CTX); cdecl;
+function EVP_CIPHER_CTX_block_size(const ctx: PEVP_CIPHER_CTX): Integer; cdecl;
+function EVP_CipherUpdate(ctx: PEVP_CIPHER_CTX; out_: Pointer;
+  outl: PInteger; const in_: Pointer; inl: Integer): Integer; cdecl;
+function EVP_CipherFinal_ex(ctx: PEVP_CIPHER_CTX; outm: Pointer;
+  outl: PInteger): Integer; cdecl;
+function EVP_CIPHER_CTX_key_length(const ctx: PEVP_CIPHER_CTX): Integer; cdecl;
+procedure BIO_set_flags(b: PBIO; flags: Integer); cdecl;
+// libeay.ext.pas functions
+
 implementation
 
 uses
