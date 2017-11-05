@@ -275,6 +275,14 @@ const
   XN_FLAG_SEP_CPLUS_SPC  = 131072;  //(2 << 16) ,+ spaced: more readable
   ASN1_STRFLGS_UTF8_CONVERT = 16;
 
+  // libeay.ext.pas constants
+  EVP_MAX_KEY_LENGTH      = 32;
+  EVP_MAX_IV_LENGTH       = 16;
+  EVP_MAX_BLOCK_LENGTH    = 32;
+  BIO_FLAGS_BASE64_NO_NL  = $100;
+  // libeay.ext.pas constants
+
+
 type
 // Check the correct "Char" type to use according to the Delphi Version
 {$IFDEF FPC}
@@ -478,7 +486,9 @@ type
 
   pEC_KEY = pointer;
 
-  pEVP_CIPHER = pointer;
+  // This line must be commented out as libeay.ext.pas code also defines the pEVP_CIPHER with added detail (record)
+  // It should not be a problem for any of the original functions, since the new definition is also a pointer
+//  pEVP_CIPHER = pointer;
 
   pEVP_MD = ^EVP_MD;
   EVP_MD = record
@@ -718,6 +728,49 @@ type
     mac: pointer;
     authsafes: pPKCS7;
     end;
+
+  // libeay.ext.pas types
+  TNotImplemented = record end;
+  PNotImplemented = ^TNotImplemented;
+  PEVP_CIPHER = ^EVP_CIPHER;
+  PEVP_CIPHER_CTX = ^EVP_CIPHER_CTX;
+
+  EVP_CIPHER = record
+    nid: Integer;
+    block_size: Integer;
+    key_len: Integer;
+    iv_len: Integer;
+    flags: LongWord;
+    init: function(ctx: PEVP_CIPHER_CTX; const key, iv: PAnsiChar; enc: Integer): Integer; cdecl;
+    do_cipher: function(ctx: PEVP_CIPHER_CTX; out_: PAnsiChar; const in_: PAnsiChar; inl: Cardinal): Integer; cdecl;
+    cleanup: function(ctx: PEVP_CIPHER_CTX): Integer;
+    ctx_size: Integer;
+    set_asn1_parameters: function(ctx: PEVP_CIPHER_CTX; ASN1: PNotImplemented): Integer; cdecl;
+    get_asn1_parameters: function(ctx: PEVP_CIPHER_CTX; ASN1: PNotImplemented): Integer; cdecl;
+    ctrl: function(ctx: PEVP_CIPHER_CTX; type_, arg: Integer; ptr: Pointer): Integer; cdecl;
+    app_data: Pointer;
+  end;
+
+  EVP_CIPHER_CTX = record
+    cipher: PEVP_CIPHER;
+    engine: PNotImplemented;
+    encrypt: Integer;
+    buf_len: Integer;
+
+    oiv: array[0..EVP_MAX_IV_LENGTH-1] of AnsiChar;
+    iv: array[0..EVP_MAX_IV_LENGTH-1] of AnsiChar;
+    buf: array[0..EVP_MAX_BLOCK_LENGTH-1] of AnsiChar;
+    num: Integer;
+
+    app_data: Pointer;
+    key_len: Integer;
+    flags: LongWord;
+    cipher_data: Pointer;
+    final_used: Integer;
+    block_mask: Integer;
+    final: array[0..EVP_MAX_BLOCK_LENGTH-1] of AnsiChar;
+	end;
+  // libeay.ext.pas types
 
 function SSLeay: cardinal;
 function SSLeay_version(t: integer): PCharacter; cdecl;
@@ -1961,6 +2014,26 @@ procedure AES_cbc_encrypt; external LIBEAY_DLL_NAME {$IFDEF USE_DELAYED}delayed{
 
 function SMIME_write_PKCS7; external LIBEAY_DLL_NAME {$IFDEF USE_DELAYED}delayed{$ENDIF};
 function SMIME_read_PKCS7; external LIBEAY_DLL_NAME {$IFDEF USE_DELAYED}delayed{$ENDIF};
+
+// libeay.ext.pas functions
+function EVP_CipherInit_ex(ctx: PEVP_CIPHER_CTX; const cipher: PEVP_CIPHER;
+  impl: PNotImplemented; const key, iv: PByte; enc: Integer): Integer; cdecl;
+  external LIBEAY_DLL_NAME {$IFDEF USE_DELAYED}delayed{$ENDIF};
+procedure EVP_CIPHER_CTX_free(a: PEVP_CIPHER_CTX); cdecl;
+  external LIBEAY_DLL_NAME {$IFDEF USE_DELAYED}delayed{$ENDIF};
+function EVP_CIPHER_CTX_block_size(const ctx: PEVP_CIPHER_CTX): Integer; cdecl;
+  external LIBEAY_DLL_NAME {$IFDEF USE_DELAYED}delayed{$ENDIF};
+function EVP_CipherUpdate(ctx: PEVP_CIPHER_CTX; out_: Pointer;
+  outl: PInteger; const in_: Pointer; inl: Integer): Integer; cdecl;
+  external LIBEAY_DLL_NAME {$IFDEF USE_DELAYED}delayed{$ENDIF};
+function EVP_CipherFinal_ex(ctx: PEVP_CIPHER_CTX; outm: Pointer;
+  outl: PInteger): Integer; cdecl; external LIBEAY_DLL_NAME
+  {$IFDEF USE_DELAYED}delayed{$ENDIF};
+function EVP_CIPHER_CTX_key_length(const ctx: PEVP_CIPHER_CTX): Integer;
+  cdecl; external LIBEAY_DLL_NAME {$IFDEF USE_DELAYED}delayed{$ENDIF};
+procedure BIO_set_flags(b: PBIO; flags: Integer); cdecl;
+  external LIBEAY_DLL_NAME {$IFDEF USE_DELAYED}delayed{$ENDIF};
+// libeay.ext.pas functions
 
 end.
 
