@@ -31,6 +31,6 @@ requires
   rtl;
 
 contains
-  libeay32 in 'libeay32.pas';
+  libeay32 in '..\src\libeay32.pas';
 
 end.
